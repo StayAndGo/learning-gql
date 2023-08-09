@@ -3,30 +3,37 @@ import persons from '../data.js';
 
 export const schema = buildSchema(`
 type Query {
-  person: PersonList
+  person(age: Int): [Person]
 }
 
-interface ResponseBody {
-  total: Int
+type Mutation {
+  updatePersonName(id: Int!, name: String!): Person
 }
 
-type Person{
+type Person {
+  id: Int,
   name: String,
   age: Int,
-  hobby: String,
+  hobby: String
 }
 
-type PersonList implements ResponseBody{
-  data: [Person],
-  total: Int
-}
 `)
 
 export const rootValue = {
-  person: (obj,args, ctx, info) => {
+  // query
+  person: ({ age },args, ctx, info) => {
+
+    return age ? persons.filter(item => item.age === age) : persons
+  },
+
+  // mutation
+  updatePersonName: ({id, name}) => {
+    const index = persons.findIndex(item => item.id === id);
+    if(!index) return {};
+    
     return {
-      total: persons.length,
-      data: persons
+      ...persons[index],
+      name
     };
   }
 }
